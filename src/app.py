@@ -56,6 +56,9 @@ def load_retriever():
 with st.spinner("Loading Medical Knowledge Base..."):
     chunks, index = load_retriever()
 
+# No knowledge base loaded yet
+if index is None:
+    st.info("📄 No medical PDF uploaded yet. Please upload a PDF from the sidebar to build the knowledge base.")
 
 # -------------------------------------------------
 # Initialize Chat
@@ -277,6 +280,10 @@ prompt = st.chat_input(
 
 if prompt:
 
+    if index is None:
+        st.warning("📄 Please upload a medical PDF first.")
+        st.stop()
+
     # Store and display user message
     add_user_message(prompt)
 
@@ -286,20 +293,19 @@ if prompt:
     # Retrieve context and generate answer
     with st.spinner("Searching medical knowledge..."):
 
-    # Build a contextual query using previous conversation
+        # Build a contextual query using previous conversation
         contextual_query = get_contextual_query(prompt)
 
         context, sources = retrieve_context(
-        contextual_query,
-        chunks,
-        index
-    )
-        
+            contextual_query,
+            chunks,
+            index
+        )
 
         answer = generate_answer(
             context,
             prompt
-    )
+        )
 
     # Remove duplicate sources
     unique_sources = []
@@ -340,18 +346,16 @@ if prompt:
                 )
 
     # Save assistant response
-    
     add_assistant_message(
         answer,
         unique_sources
     )
 
-# Save conversation to memory
+    # Save conversation to memory
     update_memory(
         prompt,
         answer
     )
 
-# Refresh UI to show the updated conversation
+    # Refresh UI to show the updated conversation
     st.rerun()
-

@@ -45,6 +45,10 @@ def build_vector_store():
 
     documents = load_pdfs(DATA_FOLDER)
 
+    if len(documents) == 0:
+        print("No PDFs found in data folder.")
+        return [], None
+
     pdf_files = sorted(
         document["pdf_name"]
         for document in documents
